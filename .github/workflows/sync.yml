@@ -1,0 +1,25 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天国际标准时间 0:00 自动运行（可自行修改）
+  workflow_dispatch: # 允许你手动点击触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          branch: main # 你的默认分支名
+
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+        with:
+          target_sync_branch: main
+          # 更改为原作者的 GitHub 用户名/仓库名
+          upstream_repository: xbtlin/ai-berkshire
+          upstream_sync_branch: main
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
