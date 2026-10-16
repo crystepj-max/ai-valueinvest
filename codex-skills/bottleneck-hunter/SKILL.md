@@ -1,6 +1,6 @@
 ---
 name: bottleneck-hunter
-description: "AI Berkshire skill: 供应链瓶颈猎手：AI驱动的全球产业链瓶颈套利. Source: skills/bottleneck-hunter.md."
+description: "供应链瓶颈猎手：AI驱动的全球产业链瓶颈套利。来源：skills/bottleneck-hunter.md."
 ---
 
 ## Codex adapter note
@@ -12,6 +12,17 @@ This skill is generated from `skills/bottleneck-hunter.md` so Claude Code and Co
 - Use shared project tools from `tools/` in this repository. Prefer running commands from the repository root with paths like `python3 tools/financial_rigor.py ...`; if the current thread starts outside the repo, locate the actual checkout path first instead of assuming a fixed home-directory path.
 - Before starting research, run the `date` command to confirm today's date; treat it as the baseline for "latest" data and state the data cutoff date in the report header. Never assume the current date from training data.
 - Preserve the research quality rules from `AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/bottleneck-hunter.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
 
 # 供应链瓶颈猎手：AI驱动的全球产业链瓶颈套利
 
@@ -215,7 +226,7 @@ B级瓶颈（有压力）：
 
 **注意**：估值检查的目的是防止推荐"PS 100倍的亏损公司"这种明显错误，而不是排除所有高估值早期公司。关键是增速、TAM、竞争格局能否支撑当前估值，需要具体分析而非一刀切。
 
-**台股标的取数**：供应链扫描常命中台股（4位数字代码，如 2330、3661），其行情/PER/市值/月营收统一用 `python3 tools/twstock_data.py`（FinMind 数据源，用法见 `skills/financial-data.md` 台股章节）。台股每月10日前强制披露上月营收，月营收同比是验证瓶颈"量价齐升"最快的公开信号。
+**台股标的取数**：供应链扫描常命中台股（4位数字代码，如 2330、3661），其行情/PER/市值/月营收统一用 `python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py"`（FinMind 数据源，用法见 `../financial-data/SKILL.md` 台股章节）。台股每月10日前强制披露上月营收，月营收同比是验证瓶颈"量价齐升"最快的公开信号。
 
 ### 4.3 深度筛选维度
 

@@ -1,3 +1,19 @@
+---
+name: earnings-review
+description: "财报精读：一手资料深度解读。来源：skills/earnings-review.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/earnings-review.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 财报精读：一手资料深度解读
 
 对 $ARGUMENTS 进行财报精读分析。
@@ -31,14 +47,14 @@
 
 ### 第一步：获取一手资料
 
-使用 Task 工具启动多个后台 Agent **并行**获取以下原始材料：
+使用当前宿主可用的搜索/研究任务收集以下原始材料；存在并发槽位时并行，不足时按资料类别分批或串行，不等待所有槽位空闲：
 
 1. **财报原文**：从公司IR页面、SEC EDGAR（美股10-K/10-Q）、港交所披露易（港股）、巨潮资讯网（A股）获取
 2. **业绩电话会纪要/录音**：从 Seeking Alpha、公司IR页面、雪球等获取
 3. **管理层致股东信**（如有年报）：完整阅读
 4. **投资者日/分析师日材料**（如近期有）
 
-如果无法获取完整原文，按 `skills/financial-data.md` 规范使用标准数据源拼凑（美股：macrotrends+stockanalysis；港股：aastocks+macrotrends；A股：东方财富+巨潮资讯；台股：FinMind `tools/twstock_data.py`+Goodinfo），但必须标注"非原始财报，来自第三方汇总"，且关键数据两源误差>1%须标记。
+如果无法获取完整原文，按 `../financial-data/SKILL.md` 规范使用标准数据源拼凑（美股：macrotrends+stockanalysis；港股：aastocks+macrotrends；A股：东方财富+巨潮资讯；台股：FinMind `$AI_BERKSHIRE_ROOT/tools/twstock_data.py`+Goodinfo），但必须标注"非原始财报，来自第三方汇总"，且关键数据两源误差>1%须标记。
 
 ### 第二步：核心财务数据提取与验证
 
@@ -75,19 +91,19 @@
 - 存货周转天数变化（是否在积压？）
 - 商誉及无形资产占比（是否有减值风险？）
 
-**数据验证**：使用 `tools/financial_rigor.py` 对关键数据进行校验：
+**数据验证**：使用 `$AI_BERKSHIRE_ROOT/tools/financial_rigor.py` 对关键数据进行校验：
 
 ```bash
 # 收入和净利润交叉验证（至少2个来源）
-python3 tools/financial_rigor.py cross-validate \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" cross-validate \
   --metric "revenue" --values 108.3e9 107.9e9 --sources "公司财报" "Yahoo Finance"
 
 # 市值校验
-python3 tools/financial_rigor.py verify-market-cap \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-market-cap \
   --price 101 --shares 1.488e9 --reported 1.44e11 --currency USD
 
 # 估值指标验算
-python3 tools/financial_rigor.py verify-valuation \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-valuation \
   --price 101 --eps 9.6 --bvps 26.5 --fcf-per-share 10.2
 ```
 
@@ -192,22 +208,22 @@ python3 tools/financial_rigor.py verify-valuation \
 
 ### 第八步：数据抽检（准出流程）
 
-报告写入后，执行数据抽检，通过方可发布：
+报告写入后执行数据抽检；通过表示数据审计完成，公开发布另按覆盖报告版本和发布对象的用户授权处理：
 
 ```bash
 # Step 1 — 提取抽检清单
-python3 tools/report_audit.py extract \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" extract \
   --report reports/{公司名}-earnings-{期间}.md
 
-# Step 2 — 对清单每项从可靠信源取数（参见 skills/financial-data.md）
+# Step 2 — 对清单每项从可靠信源取数（参见 ../financial-data/SKILL.md）
 
 # Step 3 — 输出准出/打回判决
-python3 tools/report_audit.py verdict \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" verdict \
   --results '<填好的JSON>' \
   --report {报告文件名}
 ```
 
-**【准出】** 全部通过 → 发布；**【打回】** 有不通过 → 修正后重审。
+**【准出】** 全部通过 → 标记数据审计通过；公开发布仍须有覆盖报告版本和发布对象的用户授权。**【打回】** 有不通过 → 核实原因并只复核受影响的数据项一次；若无法解决，保留缺口并标记未准出，不得称审计通过。
 
 ## 关键原则
 

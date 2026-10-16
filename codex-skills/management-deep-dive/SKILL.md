@@ -1,6 +1,6 @@
 ---
 name: management-deep-dive
-description: "AI Berkshire skill: 管理层纵深研究：买股票就是买人. Source: skills/management-deep-dive.md."
+description: "管理层纵深研究：买股票就是买人。来源：skills/management-deep-dive.md."
 ---
 
 ## Codex adapter note
@@ -12,6 +12,17 @@ This skill is generated from `skills/management-deep-dive.md` so Claude Code and
 - Use shared project tools from `tools/` in this repository. Prefer running commands from the repository root with paths like `python3 tools/financial_rigor.py ...`; if the current thread starts outside the repo, locate the actual checkout path first instead of assuming a fixed home-directory path.
 - Before starting research, run the `date` command to confirm today's date; treat it as the baseline for "latest" data and state the data cutoff date in the report header. Never assume the current date from training data.
 - Preserve the research quality rules from `AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/management-deep-dive.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
 
 # 管理层纵深研究：买股票就是买人
 
@@ -51,7 +62,7 @@ AI无法和管理层吃饭，但可以通过公开信息做到：
 
 **注意**：区分"谁在做决策"和"谁的名字在头衔上"。有些公司创始人虽然卸任但仍是灵魂人物（如黄峥之于拼多多）。
 
-确认关键人物后，使用 Task 工具启动多个后台 Agent **并行**收集以下数据：
+确认关键人物后，使用当前宿主可用的研究能力收集以下数据；若并发容量足够可拆分角色并行，否则按来源分批完成：
 1. Agent 1：CEO公开发言与预测记录（股东信、电话会、采访、社交媒体）
 2. Agent 2：资本配置决策记录（并购、回购、分红、新业务投资）
 3. Agent 3：治理结构与薪酬（股权结构、关联交易、高管薪酬）

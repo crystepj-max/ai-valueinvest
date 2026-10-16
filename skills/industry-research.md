@@ -1,3 +1,19 @@
+---
+name: industry-research
+description: "行业投资研究：产业链全景扫描 + 四大师个股分析框架。来源：skills/industry-research.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/industry-research.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 行业投资研究：产业链全景扫描 + 四大师个股分析框架
 
 对 $ARGUMENTS 行业进行系统化产业链投资研究。
@@ -81,7 +97,7 @@
 
 ## 第三步：全球上市公司扫描
 
-使用 Task 工具启动后台 Agent，全面搜索该行业所有上市公司。
+使用当前宿主可用的联网研究能力全面搜索该行业上市公司；有并发容量时拆分市场/产业链并行，容量不足时分批或串行。
 
 ### 搜索清单
 - 美股（NYSE/NASDAQ/NYSE American）相关公司
@@ -244,25 +260,25 @@
 3. 产业链全景图用代码块的文本图表示
 4. 每个环节至少分析2-3家头部公司
 5. 全球公司扫描要尽可能完整（A股/港股/美股/国际）
-6. 最终将完整报告写入 `~/[行业名]产业链投资研究报告.md`
+6. 最终将完整报告写入 `reports/{行业名}-industry-research-{YYYYMMDD}.md`
 7. 结论要明确，给出具体的标的、仓位和价格区间建议
 8. 每个分析模块末尾有对应大师的"追问"
 
 ## 数据抽检（准出流程）
 
-报告写入后，执行数据抽检，通过方可发布：
+报告写入后执行数据抽检；通过表示数据审计完成，公开发布另按覆盖报告版本和发布对象的用户授权处理：
 
 ```bash
 # Step 1 — 提取抽检清单（15%随机抽样）
-python3 tools/report_audit.py extract \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" extract \
   --report <报告文件路径>
 
-# Step 2 — 对清单每项从可靠信源取数（参见 skills/financial-data.md）
+# Step 2 — 对清单每项从可靠信源取数（参见 ../financial-data/SKILL.md）
 
 # Step 3 — 输出准出/打回判决
-python3 tools/report_audit.py verdict \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" verdict \
   --results '<填好的JSON>' \
   --report <报告文件名>
 ```
 
-**【准出】** 全部通过 → 报告可发布；**【打回】** 有不通过 → 修正后重审。
+**【准出】** 全部通过 → 标记数据审计通过；对外发布仍须有覆盖该报告版本和发布对象的用户授权。**【打回】** 有不通过 → 记录证据缺口并做必要的定向核查；无法解决时标记未准出，不得称审计通过。

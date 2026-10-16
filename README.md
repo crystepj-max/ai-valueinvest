@@ -211,13 +211,13 @@ AI Berkshire 确保：**同样的输入 → 结构一致、深度一致的输出
 | [`/thesis-drift`](skills/thesis-drift.md) | 投资论文漂移检测 | 对比两份论文/报告，区分事实变化、估值变化与措辞变化 |
 | [`/news-pulse`](skills/news-pulse.md) | 股价异动快速归因 | 股价大涨/大跌时10分钟搞清"发生了什么" |
 
-### 🧠 思维工具类
+### 🧠 思维与写作工具类
 
 | Skill | 用途 | 适合场景 |
 |-------|------|---------|
 | [`/dyp-ask`](skills/dyp-ask.md) | 段永平问答 | 以段永平的方式思考任何问题——商业、投资、人生 |
 | [`/financial-data`](skills/financial-data.md) | 财务数据获取与交叉验证规范 | 确保关键数据来自2个独立来源，误差>1%告警 |
-| [`/wechat-article`](skills/wechat-article.md) | 微信公众号文章 | 作者、编辑、读者三Agent协作，产出可发布文章 |
+| [`/investment-memo-craft`](skills/investment-memo-craft.md) | 投资报告写作与排版 | 将已完成的投研结论整理成可读、可发布的备忘录 |
 
 ### 🔗 搭配 Claude Code 内置的 /deep-research
 
@@ -281,52 +281,47 @@ claude --dangerously-skip-permissions
 
 ### 2. 安装 Skills
 
-Claude Code 用户安装（macOS / Linux）：
+安装器只在当前仓库创建项目级入口，不写用户级全局目录：Codex 使用 `.agents/skills/`；Claude Code 使用 `.claude/skills/`，并保留 `.claude/commands/` 兼容入口。
+
+两个客户端的项目 skill 入口都指向仓库内同名的完整 `codex-skills/<name>` 包，保留包内全部资源；`.claude/commands/*.md` 兼容入口继续链接扁平 canonical 源。
+
+Claude Code 用户：
 
 ```bash
-# 克隆仓库
-git clone https://github.com/xbtlin/ai-berkshire.git
-
-# 复制 skills 到 Claude Code 全局 commands 目录
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 ./scripts/install-claude-commands.sh
 ```
 
-Claude Code 用户安装（Windows PowerShell / Command Prompt）：
+Windows：
 
 ```bat
-git clone https://github.com/xbtlin/ai-berkshire.git
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 .\scripts\install-claude-commands.bat
 ```
 
-Codex 用户安装（macOS / Linux）：
+Codex 用户：
 
 ```bash
-# 克隆仓库
-git clone https://github.com/xbtlin/ai-berkshire.git
-
-# 生成并安装 Codex skills 到 ~/.codex/skills
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 ./scripts/install-codex-skills.sh
-
-# 可选：安装 Codex slash prompts 到 ~/.codex/prompts
-# 用于获得接近 Claude Code 的 /investment-research 体验
-./scripts/install-codex-prompts.sh
 ```
 
-Codex 用户安装（Windows PowerShell / Command Prompt）：
+Windows：
 
 ```bat
-git clone https://github.com/xbtlin/ai-berkshire.git
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 .\scripts\install-codex-skills.bat
-
-REM 可选：安装 Codex slash prompts
-.\scripts\install-codex-prompts.bat
 ```
 
-仓库同时维护三套入口：`skills/*.md` 是 Claude Code command 源文件；`codex-skills/*/SKILL.md` 是 Codex skill 包，由 `scripts/sync-codex-skills.py` 从 `skills/*.md` 生成；`codex-prompts/*.md` 是可选的 Codex slash prompt 兼容层。
+安装器需要 Python 3；先运行 `scripts/sync-codex-skills.py`，再为两个客户端建立指向同名完整 Codex 包的相对目录链接。Claude 的兼容命令入口仍链接扁平 canonical 源。正确的现存链接可重复使用；同名文件、目录或其他符号链接会被保留并报告冲突，不会自动覆盖。Windows 需要系统允许创建符号链接；若权限或开发者模式不满足，安装器会报错，不会退回复制或覆盖。
+
+`codex-prompts/` 与 `scripts/install-codex-prompts.*` 是旧 slash-prompt 兼容层，不属于项目 Skills 安装流程；本仓库不再推荐通过它们安装用户级 prompts。
+
+仓库维护 `skills/*.md` canonical workflow、由 `scripts/sync-codex-skills.py` 生成的 `codex-skills/*/SKILL.md`，以及仅供旧集成参考的 `codex-prompts/*.md`。
 
 ### 3. 使用
 
@@ -360,7 +355,7 @@ REM 可选：安装 Codex slash prompts
 
 # 思维工具
 /dyp-ask 拼多多的护城河到底在哪里？
-/wechat-article 美团
+# 微信公众号写作请在 Chris-Vault 项目中调用 wechat-article
 ```
 
 在 Codex 中安装后重启 Codex，然后直接按 skill 名称描述任务，例如：
@@ -371,10 +366,10 @@ REM 可选：安装 Codex slash prompts
 使用 industry-funnel 筛选 AI算力
 使用 bottleneck-hunter 扫描 AI基础设施瓶颈
 使用 thesis-drift 对比拼多多两份投资论文
-使用 wechat-article 写美团投研文章
+打开 Chris-Vault 项目后，使用 wechat-article 写美团文章
 ```
 
-如果安装了 Codex slash prompts，重启 Codex 后也可以在 `/` 菜单里搜索这些 prompt。Codex 官方的 custom prompt 入口通常显示为 `prompts:<name>`，例如：
+旧版 Codex slash-prompt 兼容层不由项目级安装器部署。若此前已手动安装，重启 Codex 后仍可在 `/` 菜单中找到；新安装请直接按上面的 skill 名称调用。旧入口通常显示为 `prompts:<name>`，例如：
 
 ```text
 /prompts:investment-research 腾讯

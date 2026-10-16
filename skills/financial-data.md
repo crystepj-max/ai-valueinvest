@@ -1,3 +1,19 @@
+---
+name: financial-data
+description: "财务数据获取与交叉验证规范。来源：skills/financial-data.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/financial-data.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 财务数据获取与交叉验证规范
 
 本规范适用于所有涉及企业财务数据的研究。**每个关键数据必须来自两个独立来源，误差>1%须标记。**
@@ -33,19 +49,19 @@
 
 | 优先级 | 来源 | URL | 获取方式 |
 |--------|------|-----|---------|
-| 1（主） | **FinMind API** | api.finmindtrade.com | `tools/twstock_data.py`（零依赖脚本，见下） |
+| 1（主） | **FinMind API** | api.finmindtrade.com | `$AI_BERKSHIRE_ROOT/tools/twstock_data.py`（零依赖脚本，见下） |
 | 2（副） | **Goodinfo台湾股市资讯网** | goodinfo.tw/tw/StockDetail.asp?STOCK_ID={代码} | 直接访问 |
 | 原始一手 | 公开资讯观测站（MOPS） | mops.twse.com.tw | 财报原文/月营收公告 |
 
 **FinMind 取数工具**（分析台股时优先调用，输出自带市值验算）：
 
 ```bash
-python3 tools/twstock_data.py quote 2330        # 最新行情 + PER/PBR/殖利率 + 市值验算
-python3 tools/twstock_data.py valuation 2330    # 估值指标 + PER一年区间 + 52周高低
-python3 tools/twstock_data.py financials 2330   # 近5年年度核心财务（营收/毛利率/归母净利/EPS/ROE）
-python3 tools/twstock_data.py revenue 2330      # 近13个月月营收及同比
-python3 tools/twstock_data.py dividend 2330     # 近年股利政策（现金/股票股利、除息日）
-python3 tools/twstock_data.py search 台積        # 搜索股票代码（注意台股名称为繁体）
+python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py" quote 2330        # 最新行情 + PER/PBR/殖利率 + 市值验算
+python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py" valuation 2330    # 估值指标 + PER一年区间 + 52周高低
+python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py" financials 2330   # 近5年年度核心财务（营收/毛利率/归母净利/EPS/ROE）
+python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py" revenue 2330      # 近13个月月营收及同比
+python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py" dividend 2330     # 近年股利政策（现金/股票股利、除息日）
+python3 "$AI_BERKSHIRE_ROOT/tools/twstock_data.py" search 台積        # 搜索股票代码（注意台股名称为繁体）
 ```
 
 台股特别注意：

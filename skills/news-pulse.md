@@ -3,6 +3,17 @@ name: news-pulse
 description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 Agent 侦察公司事件/监管政策/行业对手/市场情绪，产出"事件时间线 + 异动主因判断 + 是否触发论文重审"。
 ---
 
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/news-pulse.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 公司新闻脉搏：股价异动快速归因团队
 
 对 $ARGUMENTS 进行最近新闻侦察与异动归因。**这不是深度投研，是情报快速响应**——目标是 10 分钟内回答："这家公司最近发生了什么？股价异动的真因是什么？要不要重审投资论文？"
@@ -18,7 +29,7 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
 
 ### 第一步：确认参数与场景
 
-向用户澄清以下信息（如未在 $ARGUMENTS 中提供）：
+先从 $ARGUMENTS 解析参数；下表默认值直接生效，不因可选项缺省而中断。只在公司/证券身份存在歧义，或用户的时间窗口、异动背景会实质改变归因且无法从上下文确定时，才提出一个合并后的澄清问题：
 
 | 参数 | 说明 | 默认 |
 |------|------|------|
@@ -27,11 +38,11 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
 | **股价异动** | 涨/跌幅度 + 时间，如"跌 12%/3 天" | 选填，有则用于聚焦归因 |
 | **关注侧重** | 公司事件 / 监管 / 行业 / 情绪 | 默认四方平均 |
 
-如果用户只说了公司名，先反问："最近多少天的新闻？有具体的股价异动要解释吗？"——**不要默默假设**。
+如果用户只提供公司名，按默认回溯 14 天、无特定股价异动、四个侦察方向平均处理，并在报告中注明这些采用的默认值；用户后续补充时再按其说明调整。
 
 ### 第二步：信息可得性分级
 
-参考 `investment-team.md` 的 A/B/C 评级，但维度不同：
+参考 `../investment-team/SKILL.md` 的 A/B/C 评级，但维度不同：
 
 | 等级 | 特征 | 侦察策略 |
 |------|------|---------|
@@ -43,13 +54,13 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
 
 ### 第三步：创建团队
 
-使用 TeamCreate 创建团队：
+宿主提供团队编排时按下列名称建立团队；否则在当前线程维护角色/状态/证据简表，不因 TeamCreate 不存在而停下：
 - `team_name`: `{公司名}-newspulse`（英文小写，如 `pdd-newspulse`）
 - `agent_type`: `team-lead`
 
 ### 第四步：创建 4 个侦察任务
 
-使用 TaskCreate 创建以下 4 个任务：
+将以下 4 个任务作为角色分工清单登记（宿主支持 TaskCreate 时可建任务；否则直接用简表跟踪状态与证据）：
 
 #### 任务 1：公司事件侦察（company-event-scout）
 
@@ -96,9 +107,9 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
   1. **卖方评级变动**：高盛、摩根、中金等最近的评级/目标价调整
   2. **机构持仓变化**：13F 披露（美股）、港股通持仓、北上资金流向
   3. **做空数据**：做空比例、新发布的做空报告（如有）
-  4. **大 V 观点**：可调用 `python3 tools/xueqiu_scraper.py` 抓段永平等大 V 最近相关发言
+  4. **大 V 观点**：可调用 `python3 "$AI_BERKSHIRE_ROOT/tools/xueqiu_scraper.py"` 抓段永平等大 V 最近相关发言
      - 段永平 user_id: `1247347556`
-     - 命令示例：`python3 tools/xueqiu_scraper.py --user-id 1247347556 --keywords {公司名},{股票代码} --output /tmp/dyp-{公司名}.md`
+     - 命令示例：`python3 "$AI_BERKSHIRE_ROOT/tools/xueqiu_scraper.py" --user-id 1247347556 --keywords {公司名},{股票代码} --output /tmp/dyp-{公司名}.md`
      - 仅在该公司是段永平/李录关注标的时调用，否则跳过节省时间
   5. **传言与小作文**：媒体未证实的传言、社交媒体讨论热点（雪球/X/Reddit）
   6. **技术面信号**：是否触及关键支撑/阻力、是否有大宗交易、融资融券异常
@@ -106,7 +117,7 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
 
 ### 第五步：并行启动 4 个 Agent
 
-**必须在同一条消息中并行调用 4 次 Task 工具**。每个 Agent 配置：
+尽量并行启动 4 个侦察任务；按当前宿主实际可用并发槽位分批提交，必要时串行，不为等齐 4 个槽位而停住独立工作。每个 Agent 配置：
 - `subagent_type`: `general-purpose`
 - `run_in_background`: `true`
 - `team_name`: `{公司名}-newspulse`
@@ -141,15 +152,15 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
 5. 严格区分"事实"与"推测"，遵循 CLAUDE.md 客观性原则
 
 **完成后**：
-1. 使用 TaskUpdate 将任务标记为 completed
-2. 通过 SendMessage 把完整侦察报告发送给 team-lead（type: "message", recipient: "team-lead"）
+1. 将已完成角色标记完成并记录其证据。
+2. 将完整侦察结果回收到本线程或报告草稿；若宿主支持 Agent 消息则可用该通道，不把 `SendMessage` 作为必要依赖。
 ```
 
 ### 第六步：实时跟踪进度
 
 - 每收到一份侦察报告，向用户展示该维度的 3 条核心发现
 - 等待全部 4 份到齐
-- 全部到齐后，通过 SendMessage 向 4 个 Agent 发送 shutdown_request
+- 全部结果汇总后关闭可关闭的子 Agent；没有显式关闭接口时无需执行清理 API
 
 ### 第七步：team-lead 综合归因
 
@@ -220,7 +231,7 @@ description: 公司新闻脉搏：股价异动时快速归因。用 4 个并行 
 
 ### 第九步：清理团队
 
-使用 TeamDelete 清理团队资源。
+若宿主提供团队清理 API，汇总后清理本次创建的团队；否则无需额外动作。
 
 ## 关键原则
 

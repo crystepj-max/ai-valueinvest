@@ -1,12 +1,28 @@
+---
+name: investment-team
+description: "投研团队：四角色并行分析框架。来源：skills/investment-team.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/investment-team.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 投研团队：四角色并行分析框架
 
-对 $ARGUMENTS 进行团队化投资研究分析。使用 Team 工具创建真正的多Agent并行研究团队。
+对 $ARGUMENTS 进行团队化投资研究分析。宿主支持团队编排时创建多 Agent 研究团队；否则在当前线程按四个视角分批执行并维护证据表，不因 Team API 缺失停下。
 
 ## 执行流程
 
 ### 第一步：展示团队框架
 
-向用户展示以下团队结构，确认后启动：
+简述以下分工后按已授权研究任务继续；不为内部人员分工增加确认关口：
 
 | 角色 | 职责 | 分析框架 |
 |------|------|----------|
@@ -33,28 +49,24 @@
 
 ### 第一步¾：WebSearch 权限预检（关键 · 避免 Agent 静默退化）
 
-在创建团队、启动任何后台 Agent **之前**，必须先确认 WebSearch 权限已放行。
+在分派研究前，使用当前宿主实际提供的联网能力完成一次只读检索，确认能取得来源。以下 Claude 配置检查仅在 Claude Code 使用该 WebSearch 工具时适用；Codex 等其他宿主不得以缺少 Claude 配置判定无法联网。
 
-**为什么必须预检**：本 skill 用 `run_in_background: true` 启动 4 个后台子 Agent，而**后台 Agent 无法向用户弹出交互式权限确认**。若 `WebSearch` 未在 `.claude/settings.local.json` 的 `permissions.allow` 白名单中，子 Agent 的联网搜索会被**静默拦截**，导致其退化为仅凭训练知识（有知识截止日期）作答，却仍按框架输出一份"看起来完整、实则未联网"的伪研究——这是本 skill 最危险的失败模式（见 issue #58）。
+**目的**：避免把训练知识误报成最新联网研究。当前宿主若提供联网能力，先用该能力做一条只读来源检索；Claude Code 的白名单检查只在实际使用 Claude `WebSearch` 时适用，其他宿主不检查 `.claude` 配置。
 
 **预检步骤**：
-1. 用 Bash 检查白名单是否含 WebSearch：
-   ```bash
-   grep -l '"WebSearch"' .claude/settings.local.json ~/.claude/settings.local.json 2>/dev/null
-   ```
-2. 若两处都未命中（即未放行）→ **停下来，不要启动 Agent**，提示用户：
-   > ⚠️ 检测到 WebSearch 未在权限白名单中。后台研究 Agent 无法联网，会退化成仅凭训练知识作答。请先在 `.claude/settings.local.json` 的 `permissions.allow` 加入 `"WebSearch"`（或运行 `/permissions` 勾选），再重跑本命令。
-3. 命中 → 正常继续。
+1. 用当前宿主实际可用的联网工具检索一个与目标公司/行业直接相关的来源。
+2. 若成功取得来源，继续研究并保留链接。
+3. 若当前宿主没有联网能力，继续整理可用资料和其他独立分析；明确标注未联网、资料截止和受影响的结论，不得以训练知识冒充最新结果。只有依赖联网的交付部分暂停，其他部分继续。
 
 ### 第二步：创建团队
 
-使用 TeamCreate 创建团队：
+宿主提供团队编排时按下列名称建立团队；否则在当前线程维护角色/状态/证据简表，不因 TeamCreate 不存在而停下：
 - team_name: `{公司名}-research`（英文小写，如 `meituan-research`）
 - agent_type: `team-lead`
 
 ### 第三步：创建4个任务
 
-使用 TaskCreate 创建以下4个任务（每个都要有 subject、description、activeForm）：
+把以下4个视角记录为内部任务清单（宿主支持 TaskCreate 时可建任务；否则在本线程跟踪角色、状态和证据）：
 
 #### 任务1：商业模式分析
 - subject: `分析{公司名}商业模式、护城河与用户价值`
@@ -76,11 +88,11 @@
   4. 资产负债表健康度：现金储备、负债率、流动性
   5. 估值分析：PE/PS/PB/EV等，与历史及同业对比
   6. 安全边际评估：内在价值 vs 当前股价
-  7. **金融严谨性验证（必须使用Bash调用工具，禁止心算）**：
-     - 市值验算：`python3 tools/financial_rigor.py verify-market-cap --price {价格} --shares {股本} --reported {报告市值} --currency {币种}`
-     - 估值验算：`python3 tools/financial_rigor.py verify-valuation --price {价格} --eps {EPS} --bvps {每股净资产}`
-     - 关键数据交叉验证：`python3 tools/financial_rigor.py cross-validate --field {字段} --values '{JSON}' --unit {单位}`
-     - 三情景估值：`python3 tools/financial_rigor.py three-scenario --price {价格} --eps {EPS} --shares {股本亿} --growth {乐观} {中性} {悲观} --pe {乐观PE} {中性PE} {悲观PE}`
+  7. **金融严谨性验证（使用当前宿主可运行的本地命令能力调用工具；禁止心算）**：
+     - 市值验算：`python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-market-cap --price {价格} --shares {股本} --reported {报告市值} --currency {币种}`
+     - 估值验算：`python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-valuation --price {价格} --eps {EPS} --bvps {每股净资产}`
+     - 关键数据交叉验证：`python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" cross-validate --field {字段} --values '{JSON}' --unit {单位}`
+     - 三情景估值：`python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" three-scenario --price {价格} --eps {EPS} --shares {股本亿} --growth {乐观} {中性} {悲观} --pe {乐观PE} {中性PE} {悲观PE}`
      - 将工具输出结果直接嵌入报告中作为验证记录
 
 #### 任务3：行业与竞争分析
@@ -108,7 +120,7 @@
 
 ### 第四步：启动4个并行Agent
 
-使用 Task 工具同时启动4个Agent（**必须在同一条消息中并行调用**）：
+尽量并行启动 4 个研究任务，按当前宿主实际可用并发槽位分批提交；必要时串行，不等待全部槽位空闲后才开始：
 
 每个Agent的配置：
 - `subagent_type`: `general-purpose`
@@ -128,10 +140,10 @@
 
 **研究方法**：
 - 使用 WebSearch 搜索最新公开信息（财报、行业报告、新闻）
-- **财务数据必须来自两个独立来源**，按 `skills/financial-data.md` 规范执行（美股：macrotrends+stockanalysis；港股：aastocks+macrotrends；A股：东方财富+巨潮资讯；台股：FinMind `tools/twstock_data.py`+Goodinfo），两源误差>1%须标记
+- **财务数据必须来自两个独立来源**，按 `../financial-data/SKILL.md` 规范执行（美股：macrotrends+stockanalysis；港股：aastocks+macrotrends；A股：东方财富+巨潮资讯；台股：FinMind `$AI_BERKSHIRE_ROOT/tools/twstock_data.py`+Goodinfo），两源误差>1%须标记
 - 确保数据准确，关键数据标注来源
 - 分析要深入，不流于表面
-- **联网失败禁止伪装**：若 WebSearch 被拦截/不可用，禁止用训练知识冒充联网结果。必须在报告顶部醒目标注「⚠️ 本报告未能联网，基于训练知识（截止日期 X），置信度降级」，并如实告知 team-lead，由其决定是否中止研究
+- **联网失败禁止伪装**：若当前宿主的联网能力不可用，禁止用训练知识冒充联网结果。在报告顶部标注「未能联网」及实际资料截止日期，并降低受影响结论的置信度；继续完成不依赖联网的研究部分，只有依赖最新来源的部分标为未验证。
 
 **输出要求**：
 - 报告要详尽，使用Markdown表格呈现关键数据
@@ -139,8 +151,8 @@
 - 报告末尾要有该维度的总体结论
 
 **完成后**：
-1. 使用 TaskUpdate 将任务 #{任务编号} 标记为 completed
-2. 通过 SendMessage 把完整分析报告发送给 team-lead（type: "message", recipient: "team-lead"）
+1. 使用宿主可用的任务状态功能标记完成；没有该功能时更新本地进度表。
+2. 将完整分析报告回收到本线程或工作区草稿交由 team-lead 汇总；仅在宿主提供该接口时使用 SendMessage。
 ```
 
 ### 第五步：接收报告并跟踪进度
@@ -151,7 +163,7 @@
 
 ### 第六步：关闭团队成员
 
-全部报告收到后，向4个Agent发送 shutdown_request（使用 SendMessage，type: "shutdown_request"）。
+全部报告汇总后关闭仍在运行的子 Agent；没有显式关闭接口时无需额外清理 API。
 
 ### 第七步：汇总最终报告
 
@@ -194,33 +206,33 @@
 
 ### 第八步：保存报告
 
-将完整最终报告写入 `~/{公司名}投资研究报告_{日期}.md`（日期格式 YYYYMMDD）。
+将完整最终报告写入 `reports/{公司名}投资研究报告_{YYYYMMDD}.md`（日期格式 YYYYMMDD）。
 
 ### 第九步：数据抽检（准出流程）
 
 ```bash
 # Step 1 — 提取抽检清单（15%随机抽样）
-python3 tools/report_audit.py extract \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" extract \
   --report <报告文件路径>
 
-# Step 2 — 对清单每项从可靠信源取数（参见 skills/financial-data.md）
+# Step 2 — 对清单每项从可靠信源取数（参见 ../financial-data/SKILL.md）
 
 # Step 3 — 输出准出/打回判决
-python3 tools/report_audit.py verdict \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" verdict \
   --results '<填好的JSON>' \
   --report <报告文件名>
 ```
 
-**【准出】** 全部通过 → 报告可发布；**【打回】** 有不通过 → 修正后重审。
+**【准出】** 全部通过 → 标记数据审计通过；对外发布仍须有覆盖该报告版本和发布对象的用户授权。**【打回】** 有不通过 → 记录证据缺口并做必要的定向核查；无法解决时标记未准出，不得称审计通过。
 
 ### 第十步：清理团队
 
-使用 TeamDelete 清理团队资源。
+若宿主提供团队清理 API，汇总后清理本次创建的团队；否则无需额外动作。
 
 ## 重要注意事项
 
-1. **4个Agent必须并行启动**——在同一条消息中调用4次Task工具
-2. **Agent通过SendMessage汇报**——不是文件协作，是消息通信
+1. **保留4个研究视角**——并发不足时分批或串行执行，逐项汇总其证据与缺口
+2. **报告回收路径**——优先通过当前宿主可用的 Agent 消息通道；若没有，则使用本线程进度表/工作区草稿，不把特定消息 API 当作硬依赖
 3. **数据准确性**——要求Agent使用WebSearch搜索最新数据，关键数据交叉验证
 4. **结论要明确**——不回避给出买入/观望/回避建议和具体价格区间
 5. **所有分析必须有数据支撑**——附数据来源

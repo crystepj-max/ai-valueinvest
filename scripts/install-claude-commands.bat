@@ -3,16 +3,17 @@ setlocal
 
 for %%I in ("%~dp0..") do set "ROOT=%%~fI"
 
-if defined CLAUDE_COMMANDS_DIR (
-  set "DEST=%CLAUDE_COMMANDS_DIR%"
+where py >nul 2>nul
+if %ERRORLEVEL%==0 (
+  set "PYTHON_LAUNCHER=py -3"
 ) else (
-  set "DEST=%USERPROFILE%\.claude\commands"
+  set "PYTHON_LAUNCHER=python"
 )
 
-if not exist "%DEST%" mkdir "%DEST%"
+%PYTHON_LAUNCHER% "%ROOT%\scripts\sync-codex-skills.py"
 if errorlevel 1 exit /b %ERRORLEVEL%
 
-copy /Y "%ROOT%\skills\*.md" "%DEST%\" >nul
+%PYTHON_LAUNCHER% "%ROOT%\scripts\install-project-skills.py" "%ROOT%" claude
 if errorlevel 1 exit /b %ERRORLEVEL%
 
-echo Installed Claude Code commands to %DEST%
+echo Claude Code project skills are available from this repository's .claude\skills directory.
