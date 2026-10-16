@@ -1,3 +1,19 @@
+---
+name: investment-research
+description: "投资研究：巴菲特-芒格-段永平-李录 四大师综合分析框架。来源：skills/investment-research.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/investment-research.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling lives in the separately maintained `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` when configured. Otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm the selected root contains `AGENTS.md` and the exact tool file under `tools/` before invoking it; use the checkout read-only and do not copy these tools into the skill package.
+- If the maintained source or a required tool is unavailable, continue research that does not depend on it, mark affected calculations/audits as unverified, and do not claim a tool passed. Ask for the source location only when the missing dependency blocks the user’s requested deliverable.
+- Establish the data cutoff from the current task’s date and user time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 投资研究：巴菲特-芒格-段永平-李录 四大师综合分析框架
 
 对 $ARGUMENTS 进行系统化投资研究分析。
@@ -34,12 +50,12 @@
 
 ### 第一步：数据收集
 
-> **数据源规范**：参见 `skills/financial-data.md`。所有财务数据必须来自两个独立来源，误差>1%须标记。
+> **数据源规范**：参见 `../financial-data/SKILL.md`。所有财务数据必须来自两个独立来源，误差>1%须标记。
 > - 美股：macrotrends（主）+ stockanalysis（副）
 > - 港股：aastocks（主）+ macrotrends ADR（副）
 > - A股：东方财富（主）+ 巨潮资讯（副）
 
-使用 Task 工具启动后台 Agent，从网络收集以下数据：
+用当前宿主实际可用的联网研究能力收集以下数据；可按业务/财务/行业/风险视角拆分并行，但按可用容量分批，必要时在当前线程串行完成：
 
 1. 收入结构：最近财年及近4季度分部收入、增速、毛利率
 2. 财务指标：近5年收入、净利润、毛利率、经营利润率、自由现金流、现金储备
@@ -54,7 +70,7 @@
 
 #### 数据交叉验证（必须执行，使用金融严谨性工具）
 
-数据收集完成后，**必须调用 `tools/financial_rigor.py` 对关键数据进行程序化验证**，杜绝LLM心算误差。
+数据收集完成后，**必须调用 `$AI_BERKSHIRE_ROOT/tools/financial_rigor.py` 对关键数据进行程序化验证**，杜绝LLM心算误差。
 
 **必须验证的数据点**：
 - 总股本（从交易所、Yahoo Finance、StockAnalysis 等至少2个源确认）
@@ -67,20 +83,20 @@
 
 Step 1 — 市值验算（精确十进制，非浮点）：
 ```bash
-python3 tools/financial_rigor.py verify-market-cap \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-market-cap \
   --price {股价} --shares {总股本} --reported {报告市值} --currency {币种}
 ```
 
 Step 2 — 关键数据多源交叉验证：
 ```bash
-python3 tools/financial_rigor.py cross-validate \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" cross-validate \
   --field {字段名} --values '{"来源1": 数值, "来源2": 数值}' --unit {单位}
 ```
 对收入、净利润、现金储备分别执行。
 
 Step 3 — 估值指标精确验算（PE/PB/ROE/FCF Yield 等）：
 ```bash
-python3 tools/financial_rigor.py verify-valuation \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-valuation \
   --price {股价} --eps {EPS} --bvps {每股净资产} --fcf-per-share {每股FCF} --dividend {每股股息}
 ```
 
@@ -89,7 +105,7 @@ python3 tools/financial_rigor.py verify-valuation \
 2. 发现来源间有差异时，优先采用公司年报/交易所数据，并注明差异原因
 3. **所有涉及计算的数据必须通过工具验算，禁止LLM心算**
 4. 工具输出结果直接嵌入报告附录"关键数据交叉验证记录"
-5. 如果工具报告 ❌ 偏差过大，必须排查原因后才能继续分析
+5. 对于差异，先核对单位、日期和来源口径。修正可证实的取数或算术错误。如果独立来源采用了不同但有效的口径，或一次定向复查/替代来源核验后差异仍在，保留双方数据并解释原因，不要强行改成一致。继续不依赖该数值的分析，并将使用它的结论标为未核实。
 
 **常见错误防范**：
 - 市值单位：港币亿 vs 人民币亿 vs 美元亿，容易漏写/多写一个零
@@ -162,7 +178,7 @@ python3 tools/financial_rigor.py verify-valuation \
 - 反向DCF：当前股价隐含了什么增长预期？
 - 三情景估值 —— **必须通过工具精确计算，禁止心算**：
 ```bash
-python3 tools/financial_rigor.py three-scenario \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" three-scenario \
   --price {股价} --eps {EPS} --shares {总股本亿} \
   --growth {乐观增速} {中性增速} {悲观增速} \
   --pe {乐观PE} {中性PE} {悲观PE} --years 3 --currency {币种}
@@ -172,7 +188,7 @@ python3 tools/financial_rigor.py three-scenario \
 
 #### 长期折现估值（十年尺度，必须执行）
 
-三年三情景回答"贵不贵"，十年折现回答"值不值得重仓"。**凡是给出十年期 IRR 或终值倍数的研究，必须走这套流程**，用 `tools/terminal_value.py`。
+三年三情景回答"贵不贵"，十年折现回答"值不值得重仓"。**凡是给出十年期 IRR 或终值倍数的研究，必须走这套流程**，用 `$AI_BERKSHIRE_ROOT/tools/terminal_value.py`。
 
 终值倍数只有一个合法来源——永续增长模型，**不许用同业类比**：
 
@@ -193,7 +209,7 @@ $$PE_{终值} = \frac{1 - g/ROIC}{r - g}$$
 **Step 2 — 三条硬约束准出检查（不通过不许把估值写进报告）：**
 
 ```bash
-python3 tools/terminal_value.py audit \
+python3 "$AI_BERKSHIRE_ROOT/tools/terminal_value.py" audit \
   --currency {CNY|USD|HKD} --r {资本成本} --roic {稳态ROIC} \
   --g {悲观g},{基准g},{乐观g} --rf {无风险利率} --beta 1.0 \
   --discrete-risks "{风险名}:{情景|尾部档|概率|未建模},..."
@@ -209,16 +225,16 @@ python3 tools/terminal_value.py audit \
 
 **C3 为什么是硬的**：抬 r 三个百分点，对第 10 年现金流的惩罚是第 1 年的 2.6 倍；而退市风险是大致均匀甚至前置的年度危害率。**用折现率处理离散风险，会系统性地把风险的时间分布搞反。** 正确做法是单列一个尾部情景档并给它一个概率。
 
-**C1/C2/C3 的完整论证见** `reports/7公司10年投资价值横评-确定性调整后回报-20260814.md` 第 3.4–3.6 节——三条都是那份报告实际踩过的坑。
+**C1/C2/C3 的完整论证样例**可在只读的 `ai-berkshire/reports/7公司10年投资价值横评-确定性调整后回报-20260814.md` 第 3.4–3.6 节查阅（仅当该历史文件存在时）；它是示例，不是本流程的依赖，缺失不阻塞研究。
 
 **Step 3 — 出数（准出后才能跑）：**
 
 ```bash
 # 单点退出 PE，打印完整算式（留存率/分子/分母全部展开，便于报告引用）
-python3 tools/terminal_value.py pe --roic {ROIC} --g {g} --r {r}
+python3 "$AI_BERKSHIRE_ROOT/tools/terminal_value.py" pe --roic {ROIC} --g {g} --r {r}
 
 # 从零算 IRR
-python3 tools/terminal_value.py irr \
+python3 "$AI_BERKSHIRE_ROOT/tools/terminal_value.py" irr \
   --profit {终值年利润} --mcap {今日市值} --pe {退出PE} \
   --years 10 --payout {股息率-稀释率}
 ```
@@ -265,7 +281,7 @@ python3 tools/terminal_value.py irr \
 1. 所有分析必须有数据支撑，附数据来源
 2. 使用 Markdown 表格呈现关键数据
 3. 每个模块末尾必须有对应大师的"追问"
-4. 最终将完整报告写入 `~/[公司名]投资研究报告.md`
+4. 最终将完整报告写入 `reports/{公司名}投资研究报告_{YYYYMMDD}.md`
 5. 结论要明确，不回避给出买入/观望/回避的建议
 6. 估值部分必须给出具体的价格区间
 7. **报告开头**必须包含"信息丰富度评级"（A/B/C）和"AI研究局限性声明"
@@ -274,41 +290,41 @@ python3 tools/terminal_value.py irr \
 
 ## 数据抽检（准出流程）
 
-报告写入文件后，**必须**执行数据抽检，通过后方可发布：
+报告写入文件后，**必须**执行数据抽检；通过表示数据审计完成，公开发布另按覆盖报告版本和发布对象的用户授权处理：
 
 **Step 1 — 提取抽检清单（15%随机抽样）：**
 ```bash
-python3 tools/report_audit.py extract \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" extract \
   --report <报告文件路径>
 ```
 输出 JSON 模板，每项含 `fetched_value`（待填）。
 
 **Step 2 — 取数核验：**
-对清单中每个数据点，按 `skills/financial-data.md` 规范从可靠信源取数
+对清单中每个数据点，按 `../financial-data/SKILL.md` 规范从可靠信源取数
 （美股：macrotrends+stockanalysis；港股：aastocks+macrotrends；A股：东方财富+巨潮资讯），
 填入 `fetched_value` / `fetched_source` / `fetched_value2` / `fetched_source2`。
 
 **Step 3 — 输出判决：**
 ```bash
-python3 tools/report_audit.py verdict \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" verdict \
   --results '<填好的JSON>' \
   --report <报告文件名>
 ```
 
-- **【准出】**：所有抽检点偏差 ≤ 1% → 报告可发布
-- **【打回】**：任意点偏差 > 1% → 修正对应数据后重新抽检，直到准出
+- **【准出】**：所有抽检点偏差 ≤ 1% 且来源、口径和工具结果可复核 → 数据审计通过；是否发布仍按用户的发布授权处理
+- **【未准出】**：任意点偏差 > 1% → 核对单位、日期、口径和原始来源。若证实是取数或算术错误，修正错误并复核该项；若属于无法统一的来源口径差异，保留两边数据和解释。对仍有疑点的项目最多做一次定向复查或替代来源核验。复查后仍未解决的，标记为“数据核验未完成/不得发布”，列明受影响结论；仍可交付与该数据无关的研究部分。不得反复调整有效数据以达到阈值，也不得称为准出。
 
 **Step 4 — 估值口径复检（含十年折现估值的报告必须执行）：**
 
 如果报告里出现了十年期 IRR 或终值倍数，把最终定稿用的参数再跑一遍 audit，确认写进报告的数字与准出时的一致：
 
 ```bash
-python3 tools/terminal_value.py audit \
+python3 "$AI_BERKSHIRE_ROOT/tools/terminal_value.py" audit \
   --currency {币种} --r {r} --roic {ROIC} --g {三档g} --rf {无风险利率} \
   --beta {β} --discrete-risks "{风险归属清单}"
 ```
 
-- **【准出】**（退出码 0）→ 报告可发布
-- **【打回】**（退出码 1）→ 修正后重跑，直到准出
+- **【准出】**（退出码 0）→ 估值口径审计通过；这只代表机器核验结果，是否发布仍取决于覆盖该报告、版本和发布对象的用户授权
+- **【未准出】**（退出码 1）→ 检查输入和模型假设；仅对已确认的计算或输入错误修正后复核一次。若原因是缺少可信输入或模型条件不适用，保留 audit 失败证据，不把该估值用于确定性价格结论，并标记估值核验未完成。不得为了通过而反复修改假设。
 
 **这一步不能跳过的原因**：第七步的 audit 是在算数之前做的，而写报告的过程中经常会回头调 g 或 r。**准出前的最后一次 audit 才是对报告负责的那一次。**

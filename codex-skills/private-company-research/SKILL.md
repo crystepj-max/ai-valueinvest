@@ -1,6 +1,6 @@
 ---
 name: private-company-research
-description: "AI Berkshire skill: 未上市公司研究：多Agent并行深度研究框架. Source: skills/private-company-research.md."
+description: "未上市公司研究：多Agent并行深度研究框架。来源：skills/private-company-research.md."
 ---
 
 ## Codex adapter note
@@ -12,6 +12,17 @@ This skill is generated from `skills/private-company-research.md` so Claude Code
 - Use shared project tools from `tools/` in this repository. Prefer running commands from the repository root with paths like `python3 tools/financial_rigor.py ...`; if the current thread starts outside the repo, locate the actual checkout path first instead of assuming a fixed home-directory path.
 - Before starting research, run the `date` command to confirm today's date; treat it as the baseline for "latest" data and state the data cutoff date in the report header. Never assume the current date from training data.
 - Preserve the research quality rules from `AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/private-company-research.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
 
 # 未上市公司研究：多Agent并行深度研究框架
 
@@ -55,7 +66,7 @@ This skill is generated from `skills/private-company-research.md` so Claude Code
 
 ### 第一步：展示团队框架
 
-向用户展示以下团队结构，确认后启动：
+将以下团队结构作为内部执行分工；可向用户简述后直接开始已授权的研究，不等待对内部人员配置的确认：
 
 | 角色 | 职责 | 核心视角 |
 |------|------|----------|
@@ -69,13 +80,13 @@ This skill is generated from `skills/private-company-research.md` so Claude Code
 
 ### 第二步：创建团队
 
-使用 TeamCreate 创建团队：
+宿主提供团队编排时按下列名称建立团队；否则在当前线程维护角色/状态/证据简表，不因 TeamCreate 不存在而停下：
 - team_name: `{公司名}-private-research`（英文小写，如 `ant-group-private-research`）
 - agent_type: `team-lead`
 
 ### 第三步：创建6个任务
 
-使用 TaskCreate 创建以下6个任务（每个都要有 subject、description、activeForm）：
+把以下6个视角记录为内部任务清单（宿主支持 TaskCreate 时可建任务；否则在本线程跟踪角色、状态和证据）：
 
 ---
 
@@ -801,7 +812,7 @@ This skill is generated from `skills/private-company-research.md` so Claude Code
 
 ### 第四步：启动6个并行Agent
 
-使用 Agent 工具同时启动6个Agent（**必须在同一条消息中并行调用**）：
+保留以下 6 个研究视角，并按当前宿主实际可用并发容量分批启动；有足够槽位时并行，容量不足或工具不支持时分批/串行执行，不因等待 6 个并发槽位而停止独立研究：
 
 每个Agent的配置：
 - `subagent_type`: `general-purpose`
@@ -1066,19 +1077,19 @@ Top 3 核心风险及应对策略
 
 ### 第九步：清理团队
 
-使用 TeamDelete 清理团队资源。
+若宿主提供团队清理 API，汇总后清理本次创建的团队；否则无需额外动作。
 
 ---
 
 ## 重要注意事项
 
-1. **6个Agent必须并行启动**——在同一条消息中调用6次Agent工具
+1. **保留6个研究视角**——并发容量允许时并行，不足时分批或串行；综合时标明各视角的证据与缺口
 2. **数据置信度标注**——未上市公司数据来源参差不齐，每个关键数据必须标注来源和置信度
 3. **推算要透明**——所有推算过程要展示计算逻辑，不能凭空给数字
 4. **交叉验证**——关键数据至少2个来源交叉验证，来源冲突时都列出
 5. **信号一致性检验**——汇总阶段必须做跨维度的信号一致性检查
 6. **结论要明确**——不回避给出投资/观望/回避建议，但同时说明结论的置信度
-7. **耐心等待**——6个Agent研究需要几分钟，实时向用户更新进度
+7. **按实际进度汇总**——有 Agent 正在运行时简要更新已完成与待核查部分；并发槽位不足时分批或串行推进，不因等待全部 Agent 同时完成而暂停可独立开展的研究
 8. **中英文搜索**——未上市公司信息可能分布在中英文媒体，需要两种语言搜索
 9. **反偏见核心原则**——资料少≠公司不好，AI分析篇幅短≠投资确定性低。对于信息极度稀缺的公司，切换"第一性原理模式"聚焦核心问题，不追求报告形式完整
 10. **诚实留白**——报告中明确区分"有据分析"和"推测填充"，允许出现"此维度数据不足，无法给出有意义的结论"

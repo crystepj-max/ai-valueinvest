@@ -1,6 +1,6 @@
 ---
 name: earnings-team
-description: "AI Berkshire skill: 财报精读团队：四大师并行解读 + 公众号发布. Source: skills/earnings-team.md."
+description: "财报精读团队：四大师并行解读 + 公众号发布。来源：skills/earnings-team.md."
 ---
 
 ## Codex adapter note
@@ -13,9 +13,20 @@ This skill is generated from `skills/earnings-team.md` so Claude Code and Codex 
 - Before starting research, run the `date` command to confirm today's date; treat it as the baseline for "latest" data and state the data cutoff date in the report header. Never assume the current date from training data.
 - Preserve the research quality rules from `AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
 
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/earnings-team.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 财报精读团队：四大师并行解读 + 公众号发布
 
-对 $ARGUMENTS 进行团队化财报精读分析。四位大师并行解读财报，编辑润色成文，读者评审把关质量，最终产出可直接发布的公众号文章。
+对 $ARGUMENTS 进行团队化财报精读分析。四位大师从不同视角解读财报，编辑润色成文，读者评审把关质量，最终交付经审阅的公众号文章稿；公开发布仍按覆盖该稿件、版本和发布对象的用户授权执行。
 
 **支持输入格式**：`公司名 季度`，例如：`腾讯 2025Q4`、`PDD 2025年报`、`美团 最新`
 
@@ -36,7 +47,7 @@ This skill is generated from `skills/earnings-team.md` so Claude Code and Codex 
 
 ### 第一步：获取一手资料
 
-使用 Agent 工具启动后台 Agent **并行**获取以下原始材料：
+使用当前宿主可用的搜索/研究任务获取以下原始材料；按实际并发容量并行或分批，缺少团队 API 时在本线程按来源逐项收集：
 
 | 资料类型 | 获取来源 | 优先级 |
 |---------|---------|--------|
@@ -69,7 +80,7 @@ This skill is generated from `skills/earnings-team.md` so Claude Code and Codex 
 
 ### 第三步：启动4个并行研究Agent
 
-使用 Agent 工具在**同一条消息**中启动4个后台 Agent。
+保留四个视角并尽量并行启动研究 Agent，按宿主实际并发容量分批提交；编辑和读者审阅在初稿完成后运行，不要求所有任务必须占用同一批并发槽位。
 
 ---
 
@@ -123,7 +134,7 @@ This skill is generated from `skills/earnings-team.md` so Claude Code and Codex 
    - 关键数据至少两个来源交叉验证
 
    ```bash
-   python3 tools/financial_rigor.py cross-validate \
+   python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" cross-validate \
      --metric "revenue" --values {值1} {值2} --sources "来源1" "来源2"
    ```
 
@@ -148,11 +159,11 @@ This skill is generated from `skills/earnings-team.md` so Claude Code and Codex 
 5. **估值与安全边际更新**
 
    ```bash
-   python3 tools/financial_rigor.py verify-market-cap \
+   python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-market-cap \
      --price {价格} --shares {股本} --reported {报告市值} --currency {币种}
-   python3 tools/financial_rigor.py verify-valuation \
+   python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-valuation \
      --price {价格} --eps {EPS} --bvps {每股净资产}
-   python3 tools/financial_rigor.py three-scenario \
+   python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" three-scenario \
      --price {价格} --eps {EPS} --shares {股本亿} \
      --growth {乐观} {中性} {悲观} --pe {乐观PE} {中性PE} {悲观PE}
    ```
@@ -429,15 +440,15 @@ reports/{公司名}/
 对最终文章执行抽检：
 
 ```bash
-python3 tools/report_audit.py extract \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" extract \
   --report reports/{公司名}/{公司名}-earnings-{期间}.md
 
-python3 tools/report_audit.py verdict \
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" verdict \
   --results '<填好的JSON>' \
   --report {报告文件名}
 ```
 
-**【准出】** 全部通过 → 可发布；**【打回】** 有不通过 → 修正后重审。
+**【准出】** 全部通过 → 标记数据审计通过；公开发布仍须有覆盖稿件版本和发布对象的用户授权。**【打回】** 有不通过 → 核实原因并只复核受影响的数据项一次；若无法解决，保留缺口并标记未准出，不得称审计通过。
 
 ## 与现有 Skill 的关系
 

@@ -1,11 +1,27 @@
 ---
 name: investment-memo-craft
-description: Codex-only writing and layout overlay for AI Berkshire investment research reports. Use whenever Codex creates, rewrites, revises, or critiques company/industry/fund research reports, especially long-form Markdown reports that need financial rigor, readable business mechanics, contrarian analysis, valuation-to-action guidance, investor-specific recommendations, restrained typography, and clear buy/hold/sell signals. Do not use this to modify Claude Code slash-command sources.
+description: "仅 Codex 使用的写作与排版层，用于 AI Berkshire 投资研究报告的撰写。每当 Codex 创建、重写、修订或批评公司/行业/基金研究报告，尤其是需要财务严谨、可读的商业机理、逆向分析、估值到行动的指引、针对投资人的建议、克制的排版与清晰的买入/持有/卖出信号的长文 Markdown 报告时使用。不要用它修改 Claude Code 斜杠命令源。"
 ---
+
+## Codex adapter note
+
+This skill is generated from `skills/investment-memo-craft.md` so Claude Code and Codex users share one canonical workflow.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files.
+- Use shared project tools from `tools/` in this repository. Prefer running commands from the repository root with paths like `python3 tools/financial_rigor.py ...`; if the current thread starts outside the repo, locate the actual checkout path first instead of assuming a fixed home-directory path.
+- Before starting research, run the `date` command to confirm today's date; treat it as the baseline for "latest" data and state the data cutoff date in the report header. Never assume the current date from training data.
+- Preserve the research quality rules from `AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
 
 # Investment Memo Craft
 
 ## Purpose
+## Tool Dependency
+
+Financial audit tools are maintained in the separately managed `ai-berkshire` checkout and are not bundled with this skill. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Verify the root has `AGENTS.md` and the required tool (for publish-readiness review, `$AI_BERKSHIRE_ROOT/tools/report_audit.py`) before invoking it. Keep that checkout read-only.
+
+If the source/tool is unavailable, continue editorial work and label the audit as not run; do not claim publish readiness. A successful audit is machine evidence only; release still requires authorization covering the report version and recipient/channel.
+
 
 Turn investment research into a decision-ready Codex research report. Keep the data discipline of the underlying research skill, but make the output easier for an investor to use: concrete business mechanics, sharp inverse thinking, explicit opportunity cost, action thresholds, and calm Markdown typography.
 
@@ -13,7 +29,7 @@ Use this as a writing and judgment overlay. It does not replace financial-data r
 
 For long-form AI Berkshire outputs, title the artifact as a "research report" by default. Use "investment memo" only when the user explicitly asks for a memo format.
 
-This is a Codex-only hand-written skill kept under `codex-skills/` for simple installation. Do not add a same-named `skills/investment-memo-craft.md` source unless intentionally adopting this workflow for Claude Code too.
+This is a Codex-only hand-written skill kept under `codex-skills/` for simple installation. Do not add a same-named `../investment-memo-craft/SKILL.md` source unless intentionally adopting this workflow for Claude Code too.
 
 ## Core Workflow
 

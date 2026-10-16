@@ -1,3 +1,19 @@
+---
+name: income-investment
+description: "收益投资——稳健与机会主义的分配分析。来源：skills/income-investment.md。"
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/income-investment.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # Income Investment: Durable and Opportunistic Distribution Analysis
 
 Analyze `$ARGUMENTS` to answer:
@@ -36,9 +52,9 @@ Use or refer to existing workflows instead of reproducing them:
 
 1. Run `date` before research. Put the data cutoff date in the report header.
 2. Prefer annual and interim reports, earnings releases, investor documents, regulatory filings, official releases, and official exchange data, in that order. Use secondary sources only to fill gaps and label them as secondary.
-3. Apply `skills/financial-data.md`: verify decision-critical financial data with at least two independent sources when available and flag discrepancies above 1%.
+3. Apply `../financial-data/SKILL.md`: verify decision-critical financial data with at least two independent sources when available and flag discrepancies above 1%.
 4. Date or period-label every time-sensitive figure. Separate every material statement as **Verified fact**, **Estimate**, **Assumption**, or **Analytical judgment**.
-5. Use `python3 tools/financial_rigor.py` for exact payout, yield, valuation, market-cap, portfolio-income, and scenario arithmetic. Never rely on mental arithmetic for a decision-sensitive result.
+5. Use `python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py"` for exact payout, yield, valuation, market-cap, portfolio-income, and scenario arithmetic. Never rely on mental arithmetic for a decision-sensitive result.
 6. After saving the report, run the `tools/report_audit.py extract` and `verdict` workflow. A report that fails audit is a draft, not publishable research.
 
 ## Execution Workflow
@@ -179,9 +195,9 @@ Save the result to `reports/{company}-income-investment-{YYYYMMDD}.md`, using a 
 ## Release Audit
 
 ```bash
-python3 tools/report_audit.py extract --report reports/{company}-income-investment-{YYYYMMDD}.md
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" extract --report reports/{company}-income-investment-{YYYYMMDD}.md
 # Verify every extracted item against reliable sources, then:
-python3 tools/report_audit.py verdict --results '<verified JSON>' --report {company}-income-investment-{YYYYMMDD}.md
+python3 "$AI_BERKSHIRE_ROOT/tools/report_audit.py" verdict --results '<verified JSON>' --report {company}-income-investment-{YYYYMMDD}.md
 ```
 
 Fix failed items and repeat the audit. Clearly retain unresolved gaps and lower confidence rather than filling them with assumptions.

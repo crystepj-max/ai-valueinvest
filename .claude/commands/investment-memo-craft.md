@@ -1,0 +1,1 @@
+../../skills/investment-memo-craft.md

@@ -1,6 +1,6 @@
 ---
 name: thesis-drift
-description: "AI Berkshire skill: 投资论文漂移检测：分清事实变化与措辞变化. Source: skills/thesis-drift.md."
+description: "投资论文漂移检测：分清事实变化与措辞变化。来源：skills/thesis-drift.md."
 ---
 
 ## Codex adapter note
@@ -12,6 +12,17 @@ This skill is generated from `skills/thesis-drift.md` so Claude Code and Codex u
 - Use shared project tools from `tools/` in this repository. Prefer running commands from the repository root with paths like `python3 tools/financial_rigor.py ...`; if the current thread starts outside the repo, locate the actual checkout path first instead of assuming a fixed home-directory path.
 - Before starting research, run the `date` command to confirm today's date; treat it as the baseline for "latest" data and state the data cutoff date in the report header. Never assume the current date from training data.
 - Preserve the research quality rules from `AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/thesis-drift.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
 
 # 投资论文漂移检测：分清事实变化与措辞变化
 
@@ -82,10 +93,10 @@ This skill is generated from `skills/thesis-drift.md` so Claude Code and Codex u
 
 ### A3：数值与估值校验
 
-所有数值变化必须使用 `tools/financial_rigor.py` 做精确计算，禁止 LLM 心算：
+所有数值变化必须使用 `$AI_BERKSHIRE_ROOT/tools/financial_rigor.py` 做精确计算，禁止 LLM 心算：
 
 ```bash
-python3 tools/financial_rigor.py verify-valuation \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-valuation \
   --price {当前价格} \
   --eps {EPS} \
   --bvps {每股净资产} \
@@ -95,10 +106,10 @@ python3 tools/financial_rigor.py verify-valuation \
 如需计算市值、百分比变化、目标价差异或情景估值，使用：
 
 ```bash
-python3 tools/financial_rigor.py verify-market-cap --price {价格} --shares {股本} --reported {报告市值} --currency {币种}
-python3 tools/financial_rigor.py cross-validate --field {字段} --values '{JSON}' --unit {单位}
-python3 tools/financial_rigor.py three-scenario --price {价格} --eps {EPS} --shares {股本亿} --growth {乐观} {中性} {悲观} --pe {乐观PE} {中性PE} {悲观PE}
-python3 tools/financial_rigor.py calc --expr '{精确算式}'
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-market-cap --price {价格} --shares {股本} --reported {报告市值} --currency {币种}
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" cross-validate --field {字段} --values '{JSON}' --unit {单位}
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" three-scenario --price {价格} --eps {EPS} --shares {股本亿} --growth {乐观} {中性} {悲观} --pe {乐观PE} {中性PE} {悲观PE}
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" calc --expr '{精确算式}'
 ```
 
 关键财务数据必须至少两处独立来源交叉验证。来源不足、口径不一致、无法复核的数字必须标注为"低置信度 / 待核实"。
@@ -219,7 +230,7 @@ python3 tools/financial_rigor.py calc --expr '{精确算式}'
 
 - **证据优先于措辞** — 同义改写不是漂移，只有事实证据变化才是漂移
 - **基本面优先于股价** — 股价涨跌只影响估值锚点，不自动改变生意质量
-- **数值必须验算** — 所有百分比、估值倍数、目标价差异必须用 `tools/financial_rigor.py`
+- **数值必须验算** — 所有百分比、估值倍数、目标价差异必须用 `$AI_BERKSHIRE_ROOT/tools/financial_rigor.py`
 - **不确定就标注不确定** — 来源缺失、口径不一致、无法复核时，不要硬判
 - **红线单独处理** — 红线触发优先级高于估值便宜，不能被低 PE 掩盖
 - **输出必须可复盘** — 每个 Improved / Weakened 结论都要能追溯到具体证据

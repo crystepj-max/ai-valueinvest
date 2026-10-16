@@ -1,3 +1,19 @@
+---
+name: portfolio-review
+description: "组合管理：从\\\"研究公司\\\"到\\\"管理组合\\\"。来源：skills/portfolio-review.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/portfolio-review.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 组合管理：从"研究公司"到"管理组合"
 
 对 $ARGUMENTS 执行投资组合审视与优化。
@@ -36,7 +52,7 @@
 
 ### 第二步：获取最新数据
 
-使用 Task 工具启动后台 Agent，通过 WebSearch 为每个持仓并行获取：
+使用当前宿主的联网能力逐仓获取以下资料；并发容量允许时并行，持仓多或槽位不足时分批处理并维护逐仓状态表：
 1. 当前股价和估值指标（PE、PB、股息率）
 2. 最近一个季度的关键财务变化
 3. 近期重大事件

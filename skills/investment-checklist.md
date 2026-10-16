@@ -1,3 +1,19 @@
+---
+name: investment-checklist
+description: "巴菲特价值投资买入前 Checklist。来源：skills/investment-checklist.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/investment-checklist.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 巴菲特价值投资买入前 Checklist
 
 对 $ARGUMENTS 执行巴菲特价值投资买入前 Checklist 分析。
@@ -28,7 +44,7 @@
 
 ### 第二步：并行数据收集
 
-使用 Task 工具为**每家公司**启动独立的后台 Agent 进行数据收集（所有公司同时并行启动），每个Agent负责收集：
+为每家公司保留独立的数据收集记录；使用当前宿主实际可用并发槽位分批并行，必要时逐家公司处理，不要求所有公司同时启动：
 
 1. **盈利能力**：ROE（5-10年趋势）、毛利率、净利率、自由现金流
 2. **估值数据**：当前股价、市值、PE(TTM)、前瞻PE、PB、股息率
@@ -69,7 +85,7 @@
 用数据说话，**关键指标必须通过工具精确计算**：
 
 ```bash
-python3 tools/financial_rigor.py verify-valuation \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" verify-valuation \
   --price {股价} --eps {EPS} --bvps {每股净资产} --fcf-per-share {每股FCF} --dividend {每股股息}
 ```
 
@@ -145,7 +161,7 @@ python3 tools/financial_rigor.py verify-valuation \
 
 追加检验（**必须通过工具精确计算，禁止心算**）：
 ```bash
-python3 tools/financial_rigor.py three-scenario \
+python3 "$AI_BERKSHIRE_ROOT/tools/financial_rigor.py" three-scenario \
   --price {股价} --eps {EPS} --shares {股本亿} \
   --growth {乐观} {中性} {悲观} --pe {乐观PE} {中性PE} {悲观PE} --currency {币种}
 ```
@@ -220,7 +236,7 @@ python3 tools/financial_rigor.py three-scenario \
 - ❓ **灰色地带** — 说明关键争议点是什么，投资者需要自行判断什么
 - N/A — 未上市/无法买入
 
-将完整报告写入 `~/巴菲特Checklist-[公司名或"多公司对比"].md`
+将完整报告写入 `reports/巴菲特Checklist-[公司名或"多公司对比"]-{YYYYMMDD}.md`
 
 ## 输出格式要求
 

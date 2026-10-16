@@ -203,13 +203,13 @@ AIに直接聞けばコンテキストウィンドウは1つです。4つの並�
 | [`/thesis-drift`](skills/thesis-drift.md) | 投資テーゼのドリフト検出 | 2つのテーゼ／レポートを比較し、事実の変化・バリュエーションの変化・表現の変化を区別 |
 | [`/news-pulse`](skills/news-pulse.md) | 株価変動の迅速な要因分析 | 株が急騰・急落したとき——10分で「何が起きたか」を解明 |
 
-### 🧠 思考ツール
+### 🧠 思考・執筆ツール
 
 | Skill | 目的 | 使用場面 |
 |-------|------|---------|
 | [`/dyp-ask`](skills/dyp-ask.md) | 段永平Q&A | 段永平の思考方法で任意の問いを考える——ビジネス、投資、人生 |
 | [`/financial-data`](skills/financial-data.md) | 財務データの取得とクロスバリデーション | 重要データが2つ以上の独立したソースから得られることを保証；1%超の乖離をアラート |
-| [`/wechat-article`](skills/wechat-article.md) | WeChat記事ワークフロー | 著者・編集者・読者エージェントが協力して発行可能な記事を制作 |
+| [`/investment-memo-craft`](skills/investment-memo-craft.md) | 投資レポートの執筆・整形 | 完了した投資リサーチを読みやすいメモに整える |
 
 ---
 
@@ -267,52 +267,47 @@ claude --dangerously-skip-permissions
 
 ### 2. Skillのインストール
 
-Claude CodeユーザーでmacOS / Linuxの場合：
+インストーラーが作成するのは、このチェックアウト内のプロジェクト単位の入口だけです。Codexは `.agents/skills/`、Claude Codeは `.claude/skills/` を使い、互換性のため `.claude/commands/` も維持します。ユーザー全体のディレクトリには書き込みません。
+
+両クライアントのプロジェクトSkill入口は、このチェックアウト内の同名の完全な `codex-skills/<name>` パッケージを参照し、パッケージ内の全アセットを保持します。`.claude/commands/*.md` の互換入口は従来どおりフラットなcanonical sourceを参照します。
+
+Claude Codeの場合：
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/xbtlin/ai-berkshire.git
-
-# skillをClaude Codeグローバルコマンドディレクトリにコピー
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 ./scripts/install-claude-commands.sh
 ```
 
-Claude CodeユーザーでWindows PowerShell / コマンドプロンプトの場合：
+Windowsの場合：
 
 ```bat
-git clone https://github.com/xbtlin/ai-berkshire.git
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 .\scripts\install-claude-commands.bat
 ```
 
-CodexユーザーでmacOS / Linuxの場合：
+Codexの場合：
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/xbtlin/ai-berkshire.git
-
-# Codex skillsを生成して ~/.codex/skills にインストール
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 ./scripts/install-codex-skills.sh
-
-# オプション：Codexスラッシュプロンプトを ~/.codex/prompts にインストール
-# Claude Codeのような /investment-research エントリーポイントを使いたい場合
-./scripts/install-codex-prompts.sh
 ```
 
-CodexユーザーでWindows PowerShell / コマンドプロンプトの場合：
+Windowsの場合：
 
 ```bat
-git clone https://github.com/xbtlin/ai-berkshire.git
-cd ai-berkshire
+git clone https://github.com/crystepj-max/ai-valueinvest.git
+cd ai-valueinvest
 .\scripts\install-codex-skills.bat
-
-REM オプション：Codexスラッシュプロンプトをインストール
-.\scripts\install-codex-prompts.bat
 ```
 
-リポジトリは3つのエントリーポイントを維持しています：`skills/*.md` はClaude Codeコマンドのソース；`codex-skills/*/SKILL.md` は `scripts/sync-codex-skills.py` が `skills/*.md` から生成するCodex skillパッケージ；`codex-prompts/*.md` はオプションのCodexスラッシュプロンプト互換レイヤーです。
+各インストーラーにはPython 3が必要です。最初に `scripts/sync-codex-skills.py` を実行し、両クライアント向けに同名の完全なCodexパッケージへの相対ディレクトリリンクを作成します。Claudeの互換コマンド入口は引き続きフラットなcanonical sourceを参照します。正しい既存リンクは再利用します。同名のファイル・ディレクトリ・別のシンボリックリンクがある場合は内容を残して競合を報告し、自動上書きしません。Windowsではシンボリックリンク作成が許可されている必要があります。権限または開発者モードが不足する場合、コピーや上書きに切り替えずエラーにします。
+
+`codex-prompts/` と `scripts/install-codex-prompts.*` は旧slash-prompt互換ファイルであり、プロジェクトSkillのインストールには含まれません。ユーザー全体のpromptを導入する用途としては推奨しません。
+
+リポジトリでは `skills/*.md` をcanonical workflow、`scripts/sync-codex-skills.py` で生成する `codex-skills/*/SKILL.md` をCodex用、`codex-prompts/*.md` を旧統合向けの互換層として維持します。
 
 ### 3. 使い方
 
@@ -346,7 +341,7 @@ Claude Codeで直接呼び出す：
 
 # 思考ツール
 /dyp-ask 拼多多の本当のモートはどこにあるか？
-/wechat-article 美団
+# WeChat記事はChris-Vaultプロジェクトでwechat-articleを呼び出す
 ```
 
 Codexにインストール後、Codexを再起動してskill名で参照します：
@@ -357,10 +352,10 @@ earnings-reviewを使ってPDD2025年次の決算を分析して
 industry-funnelを使ってAI算力をスクリーニングして
 bottleneck-hunterを使ってAIインフラのボトルネックをスキャンして
 thesis-driftを使って拼多多の2つの投資テーゼを比較して
-wechat-articleを使って美団の投資記事を書いて
+Chris-Vaultプロジェクトでwechat-articleを使って美団の記事を書く
 ```
 
-Codexスラッシュプロンプトをインストールした場合、Codexを再起動して`/`メニューから検索します。Codexの公式カスタムプロンプトエントリーポイントは通常 `prompts:<name>` として表示されます：
+旧Codexスラッシュプロンプト互換レイヤーはプロジェクト単位のインストーラーでは導入されません。以前に手動導入した場合は再起動後も`/`メニューに残ることがあります。新しいプロジェクトでは上記のSkill名を使ってください。旧入口は通常 `prompts:<name>` として表示されます：
 
 ```text
 /prompts:investment-research テンセント

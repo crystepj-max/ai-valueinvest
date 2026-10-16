@@ -1,8 +1,24 @@
+---
+name: deep-company-series
+description: "深度公司系列：8 篇长文拆一家公司。来源：skills/deep-company-series.md."
+---
+
+## Codex adapter note
+
+This first-party maintained entry preserves the original workflow from `skills/deep-company-series.md`; run the steps below in the current Codex thread and read any referenced sibling skill from this staged collection. The source pathname is provenance only, not a runtime dependency.
+
+- Treat `$ARGUMENTS` as the user's request in the current Codex thread.
+- When the source mentions Claude-only surfaces such as Task, Agent, WebSearch, Bash, Read, or Write, use the closest Codex capability available in this session: subagents when available, web search when needed, shell commands for local tools, and normal file edits for workspace files. If a named orchestration API is unavailable, maintain a compact role/task progress table in the current thread or workspace and run the defined stages sequentially; do not claim a team or parallel run that did not occur.
+- Financial tooling is maintained in the separately managed `ai-berkshire` checkout; this skill package does not include those tools. Resolve `AI_BERKSHIRE_ROOT` if configured; otherwise check `~/ai-berkshire`, then this workstation’s known checkout `/Users/chris/workspace/ai-berkshire`. Confirm that the selected root contains `AGENTS.md` and each exact required file under `tools/`. Invoke tools with `python3 "$AI_BERKSHIRE_ROOT/tools/<tool>.py" ...`; treat the checkout as read-only and do not bundle its tools into this skill.
+- If the maintained source or a required tool is unavailable, continue the work that does not depend on it, label affected calculations/audits as unverified, and never claim a tool passed. Ask for the source location only when the missing dependency blocks the requested deliverable.
+- Establish the data cutoff from the current task’s date and the user’s time zone. If the session does not provide a reliable date or zone, use an available time tool; use the shell `date` command only when its host time zone is known to match the research context. State the cutoff and time zone in the report header; never infer the current date from training data.
+- Preserve the research quality rules from the maintained `ai-berkshire/AGENTS.md`: cross-check financial data, use exact arithmetic tools for valuation/math, and clearly label uncertainty and source gaps.
+
 # 看懂XX公司（深度公司系列）：3-8 篇长文拆一家公司
 
-为 $ARGUMENTS 撰写一个《看懂XX》深度长文系列（3-8 篇，按公司复杂度定，见"篇数适配"），发布在公众号/视频号等公开渠道。**核心 IP 不是"会写"，而是"会改"——99% 的财经文章在违反本 skill 的事实核查标准**。
+为 $ARGUMENTS 撰写一组供公众号/视频号使用的《看懂XX》深度长文系列草稿（3-8 篇，按公司复杂度定，见"篇数适配"）。公开发布和仓库推送是单独动作，须有覆盖目标版本及发布对象/仓库的明确授权。**核心 IP 不是"会写"，而是"会改"——99% 的财经文章在违反本 skill 的事实核查标准**。
 
-参考样本：`reports/腾讯/《看懂腾讯》/`
+参考样本（若当前项目可读）：`ai-berkshire/reports/腾讯/《看懂腾讯》/`；该样本不随技能分发，缺失时按本技能内的篇数适配、篇内结构和写作规范执行，不阻塞创作。
 
 ---
 
@@ -156,9 +172,9 @@
 
 - 每篇写完先存 `reports/{公司名}/《看懂{公司名}》/0X-XX.md`
 - **目录冲突规则**：若 `reports/{公司名}/《看懂{公司名}》/` 已存在（旧版系列），不覆盖、不混放——新系列写入带日期后缀的新文件夹 `reports/{公司名}/《看懂{公司名}》-{YYYYMMDD}/`，旧文件夹原样保留
-- 不立即推 GitHub——等用户审阅
+- 将系列稿保存为本地可审阅草稿；不因写作完成自动推送 GitHub
 - 用户提修订意见后修改
-- 修订完才 git push
+- 用户提出修订后继续修改；只有获得覆盖此仓库和版本的明确授权时才推送
 
 ### 阶段 3：跨篇一致性扫描（全部篇目写完后）
 
@@ -175,7 +191,7 @@
 grep -r "<本机用户名>\|/Users/\|<个人身份信息>" reports/ | head
 ```
 
-确认无误后才 `git pull --rebase && git commit && git push`。
+检查无误后交付本地定稿。不得因定稿完成自动执行 `git pull`、`git commit`、`git push` 或向公众号/视频号发布；只有用户明确授权了对应仓库、版本和发布对象时，才执行其授权覆盖的外部动作。
 
 ---
 
@@ -206,7 +222,7 @@ grep -r "<本机用户名>\|/Users/\|<个人身份信息>" reports/ | head
 - 改了持股 % → 改 TOP 10 排序 + 历史持股表 + 减持清单
 - 改了术语口径 → 改首次定义 + 后续引用 + 要点回顾
 
-### 4. 推送后立即报告
+### 4. 外部推送完成后报告（仅在用户明确授权并执行后）
 
 ```
 推送成功（commit hash）。

@@ -2,10 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DEST="${CLAUDE_COMMANDS_DIR:-$HOME/.claude/commands}"
 
-mkdir -p "$DEST"
-cp "$ROOT"/skills/*.md "$DEST"/
-chmod +x "$ROOT"/tools/*.py "$ROOT"/tools/*.sh 2>/dev/null || true
-
-echo "Installed Claude Code commands to $DEST"
+python3 "$ROOT/scripts/sync-codex-skills.py"
+python3 "$ROOT/scripts/install-project-skills.py" "$ROOT" claude
+echo "Claude Code project skills are available from this repository's .claude/skills directory."
